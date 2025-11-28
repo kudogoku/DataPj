@@ -1,0 +1,180 @@
+{
+  "3018": {
+    "id": 3018,
+    "name_en": "Bkornblume",
+    "name_jp": "ブコーンブルメ",
+    "rarity": 6,
+    "class": "Spirit",
+    "element": "Star",
+    "role": "DPS / Debuffer",
+    "debut_banner": "Vissi D'arte, Vissi D'amore",
+    "notes": "Featured 6★, same banner as Name Day"
+  },
+  "3030": {
+    "id": 3030,
+    "name_en": "Name Day",
+    "name_jp": "ネームデイ",
+    "rarity": 6,
+    "class": "Mineral",
+    "element": "Plant",
+    "role": "Support",
+    "debut_banner": "Vissi D'arte, Vissi D'amore",
+    "notes": "Featured 6★ support"
+  },
+  "3033": {
+    "id": 3033,
+    "name_en": "Eagle",
+    "name_jp": "イーグル",
+    "rarity": 5,
+    "class": "Spirit",
+    "element": "Star",
+    "role": "DPS",
+    "debut_banner": "Vissi D'arte, Vissi D'amore",
+    "notes": "5★"
+  },
+  "3050": {
+    "id": 3050,
+    "name_en": "ONiON",
+    "name_jp": "オニオン",
+    "rarity": 5,
+    "class": "Spirit",
+    "element": "Plant",
+    "role": "Support",
+    "debut_banner": "Vissi D'arte, Vissi D'amore",
+    "notes": "5★"
+  },
+  "3118": {
+    "id": 3118,
+    "name_en": "La Source",
+    "name_jp": "ラ・スース",
+    "rarity": 4,
+    "class": "Spirit",
+    "element": "Water",
+    "role": "Healer",
+    "debut_banner": "Vissi D'arte, Vissi D'amore",
+    "notes": "4★ healer"
+  },
+
+  "3020": {
+    "id": 3020,
+    "name_en": "Tooth Fairy",
+    "name_jp": "トゥースフェアリー",
+    "rarity": 6,
+    "class": "Beast",
+    "element": "Star",
+    "role": "DPS",
+    "debut_banner": "The Yearning of Millet",
+    "notes": "Featured 6★"
+  },
+  "3025": {
+    "id": 3025,
+    "name_en": "Jiu Niangzi",
+    "name_jp": "酒娘子",
+    "rarity": 6,
+    "class": "Spirit",
+    "element": "Water",
+    "role": "DPS",
+    "debut_banner": "Jiu Niangzi banner",
+    "notes": "Featured 6★"
+  },
+  "3009": {
+    "id": 3009,
+    "name_en": "Druvis III",
+    "name_jp": "ドルヴィスⅢ",
+    "rarity": 6,
+    "class": "Plant",
+    "element": "Plant",
+    "role": "Control / DPS",
+    "debut_banner": "The First Drop of Rain",
+    "notes": ""
+  },
+  "3014": {
+    "id": 3014,
+    "name_en": "Centurion",
+    "name_jp": "ケントゥリオン",
+    "rarity": 6,
+    "class": "Beast",
+    "element": "Beast",
+    "role": "AoE DPS",
+    "debut_banner": "Those Remembered Years",
+    "notes": ""
+  },
+  "3015": {
+    "id": 3015,
+    "name_en": "Lilya",
+    "name_jp": "リリヤ",
+    "rarity": 6,
+    "class": "Star",
+    "element": "Star",
+    "role": "Burst DPS",
+    "debut_banner": "Those Remembered Years",
+    "notes": ""
+  },
+
+  "3037": {
+    "id": 3037,
+    "name_en": "Oliver Fog",
+    "name_jp": "オリバーフォグ",
+    "rarity": 5,
+    "class": "Mineral",
+    "element": "Smoke",
+    "role": "Support",
+    "debut_banner": "Standard 5★",
+    "notes": ""
+  },
+  "3115": {
+    "id": 3115,
+    "name_en": "Darley Clatter",
+    "name_jp": "ダーリークラッター",
+    "rarity": 4,
+    "class": "Spirit",
+    "element": "Star",
+    "role": "Support / Debuffer",
+    "debut_banner": "Standard 4★",
+    "notes": ""
+  },
+  "3111": {
+    "id": 3111,
+    "name_en": "Click",
+    "name_jp": "クリック",
+    "rarity": 4,
+    "class": "Beast",
+    "element": "Beast",
+    "role": "DPS",
+    "debut_banner": "Standard 4★",
+    "notes": ""
+  },
+  "3112": {
+    "id": 3112,
+    "name_en": "TTT (TT-TT)",
+    "name_jp": "TT-TT",
+    "rarity": 4,
+    "class": "Star",
+    "element": "Star",
+    "role": "Support",
+    "debut_banner": "Standard 4★",
+    "notes": ""
+  },
+  "3120": {
+    "id": 3120,
+    "name_en": "Cristallo",
+    "name_jp": "クリスタロ",
+    "rarity": 4,
+    "class": "Mineral",
+    "element": "Mineral",
+    "role": "Support",
+    "debut_banner": "Standard 4★",
+    "notes": ""
+  },
+  "3121": {
+    "id": 3121,
+    "name_en": "Pavia",
+    "name_jp": "パヴィア",
+    "rarity": 4,
+    "class": "Spirit",
+    "element": "Water",
+    "role": "DPS",
+    "debut_banner": "Standard 4★",
+    "notes": ""
+  }
+}

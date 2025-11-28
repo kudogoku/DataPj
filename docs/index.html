@@ -84,6 +84,8 @@
 
   <script>
     let allData = [];
+      let unitData = {};
+
 
     // โหลด CSV เมื่อหน้าเว็บเปิด
     document.addEventListener("DOMContentLoaded", () => {
@@ -98,8 +100,19 @@
         }
       });
 
-      document.getElementById("btnSummary").addEventListener("click", showSummary);
+      
+
+   // โหลด JSON
+  fetch("unit_data.json")
+      .then(res => res.json())
+      .then(data => {
+          unitData = data;
+          console.log("Loaded unitData:", unitData);
+      });	
+
+    document.getElementById("btnSummary").addEventListener("click", showSummary);
     });
+
 
     function initBannerOptions() {
       const bannerSelect = document.getElementById("bannerSelect");
