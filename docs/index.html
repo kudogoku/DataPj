@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reverse:1999 Gacha Tracker</title>
+
+  <!-- ใช้ PapaParse จาก CDN เพื่ออ่าน CSV ด้วย JS -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    h1 {
+      color: #facc15;
+    }
+    select, button {
+      padding: 6px 10px;
+      margin: 4px 0;
+      border-radius: 6px;
+      border: 1px solid #4b5563;
+      background: #111827;
+      color: #e5e7eb;
+    }
+    button {
+      cursor: pointer;
+    }
+    .card {
+      background: #111827;
+      padding: 14px 16px;
+      border-radius: 10px;
+      margin-top: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    th, td {
+      border-bottom: 1px solid #374151;
+      padding: 4px 6px;
+      text-align: left;
+    }
+    th {
+      background: #1f2937;
+    }
+  </style>
+</head>
+<body>
+  <h1>Reverse:1999 Summon Tracker</h1>
+  <p>Simple viewer of my own gacha history. Data comes from <code>reverse1999_history_clean.csv</code>.</p>
+
+  <!-- controls -->
+  <div class="card">
+    <label for="bannerSelect">Banner:</label>
+    <select id="bannerSelect">
+      <option value="ALL">All banners</option>
+    </select>
+
+    <br />
+
+    <button id="btnSummary">Show summary</button>
+  </div>
+
+  <!-- summary -->
+  <div class="card" id="summaryCard" style="display:none;">
+    <h2>Summary</h2>
+    <p id="summaryText"></p>
+
+    <h3>Top units</h3>
+    <table>
+      <thead>
+        <tr><th>Unit</th><th>Count</th></tr>
+      </thead>
+      <tbody id="topUnitsBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let allData = [];
+
+    // โหลด CSV เมื่อหน้าเว็บเปิด
+    document.addEventListener("DOMContentLoaded", () => {
+      Papa.parse("reverse1999_history_clean.csv", {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        complete: (results) => {
+          allData = results.data.filter(row => row.summon_time); // กันแถวว่าง
+
+          initBannerOptions();
+        }
+      });
+
+      document.getElementById("btnSummary").addEventListener("click", showSummary);
+    });
+
+    function initBannerOptions() {
+      const bannerSelect = document.getElementById("bannerSelect");
+      const banners = [...new Set(allData.map(row => row.banner))].sort();
+
+      banners.forEach(banner => {
+        const opt = document.createElement("option");
+        opt.value = banner;
+        opt.textContent = banner;
+        bannerSelect.appendChild(opt);
+      });
+    }
+
+    function showSummary() {
+      const bannerSelect = document.getElementById("bannerSelect");
+      const selectedBanner = bannerSelect.value;
+
+      let filtered = allData;
+      if (selectedBanner !== "ALL") {
+        filtered = allData.filter(row => row.banner === selectedBanner);
+      }
+
+      if (filtered.length === 0) {
+        alert("No data for this banner yet.");
+        return;
+      }
+
+      // จำนวน pulls
+      const totalPulls = filtered.length;
+
+      // นับ unit_name
+      const counts = {};
+      filtered.forEach(row => {
+        const name = row.unit_name || "UNKNOWN";
+        counts[name] = (counts[name] || 0) + 1;
+      });
+
+      // sort หา top 10
+      const topUnits = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+
+      // เขียน summary text
+      const summaryText = document.getElementById("summaryText");
+      if (selectedBanner === "ALL") {
+        summaryText.textContent = `Total pulls: ${totalPulls} (all banners)`;
+      } else {
+        summaryText.textContent = `Total pulls on banner "${selectedBanner}": ${totalPulls}`;
+      }
+
+      // เขียนตาราง top units
+      const tbody = document.getElementById("topUnitsBody");
+      tbody.innerHTML = "";
+      topUnits.forEach(([name, cnt]) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${name}</td><td>${cnt}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("summaryCard").style.display = "block";
+    }
+  </script>
+</body>
+</html>
