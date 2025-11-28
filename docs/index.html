@@ -107,15 +107,38 @@
 
   function initBannerOptions() {
     const bannerSelect = document.getElementById("bannerSelect");
-    const banners = [...new Set(allData.map(row => row.banner))].sort();
 
-    banners.forEach(banner => {
-      const opt = document.createElement("option");
-      opt.value = banner;
-      opt.textContent = banner;
-      bannerSelect.appendChild(opt);
-    });
-  }
+    // หา "วันแรกที่กด" ของแต่ละ banner
+    const firstSeenByBanner = {};
+
+     allData.forEach(row => {
+    const banner = row.banner;
+    if (!banner) return;
+
+    const time = new Date(row.summon_time);
+
+    if (!firstSeenByBanner[banner] || time < firstSeenByBanner[banner]) {
+      firstSeenByBanner[banner] = time;
+    }
+  });
+
+  // เอาชื่อ banner ทั้งหมดออกมา
+  let banners = Object.keys(firstSeenByBanner);
+
+  // เรียงตามวัน (จากเก่า → ใหม่)
+  banners.sort((a, b) => firstSeenByBanner[a] - firstSeenByBanner[b]);
+
+  // ถ้าอยากให้ "ใหม่สุดอยู่บนสุด" ก็ใช้บรรทัดนี้แทน:
+  // banners.sort((a, b) => firstSeenByBanner[b] - firstSeenByBanner[a]);
+
+  // เติม option ลง dropdown
+  banners.forEach(banner => {
+    const opt = document.createElement("option");
+    opt.value = banner;
+    opt.textContent = banner;   // ตอนนี้ยังใช้ชื่อจีนเหมือนเดิม
+    bannerSelect.appendChild(opt);
+  });
+}
 
   function showSummary() {
     const bannerSelect = document.getElementById("bannerSelect");
@@ -166,12 +189,21 @@
     	(fallbackRow ? fallbackRow.unit_name : `ID_${id}`);
 
 
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${name}</td>
-        <td>${count}</td>
-      `;
-      tbody.appendChild(tr);
+      const iconUrl =
+  `https://raw.githubusercontent.com/myssal/Reverse-1999-CN-Asset/master/roles/${id}/${id}_sd.png`;
+
+const tr = document.createElement("tr");
+tr.innerHTML = `
+  <td style="display:flex; align-items:center; gap:6px;">
+    <img src="${iconUrl}"
+         style="width:32px; height:auto; border-radius:4px;"
+         onerror="this.style.display='none'">
+    ${name}
+  </td>
+  <td>${count}</td>
+`;
+tbody.appendChild(tr);
+
     });
 
     document.getElementById("summaryCard").style.display = "block";
