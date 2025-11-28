@@ -76,104 +76,131 @@
     <h3>Top units</h3>
     <table>
       <thead>
-        <tr><th>Unit</th><th>Count</th></tr>
+        <tr>
+          <th>Unit</th>
+          <th>Rarity</th>
+          <th>Debut banner</th>
+          <th>Count</th>
+        </tr>
       </thead>
       <tbody id="topUnitsBody"></tbody>
     </table>
+
   </div>
 
-  <script>
-    let allData = [];
-      let unitData = {};
+<script>
+  // ตัวแปร global เก็บข้อมูล
+  let allData = [];
+  let unitData = {};
 
-
-    // โหลด CSV เมื่อหน้าเว็บเปิด
-    document.addEventListener("DOMContentLoaded", () => {
-      Papa.parse("reverse1999_history_clean.csv", {
-        download: true,
-        header: true,
-        dynamicTyping: true,
-        complete: (results) => {
-          allData = results.data.filter(row => row.summon_time); // กันแถวว่าง
-
-          initBannerOptions();
-        }
-      });
-
-      
-
-   // โหลด JSON
-  fetch("unit_data.json")
-      .then(res => res.json())
-      .then(data => {
-          unitData = data;
-          console.log("Loaded unitData:", unitData);
-      });	
-
-    document.getElementById("btnSummary").addEventListener("click", showSummary);
+  document.addEventListener("DOMContentLoaded", () => {
+    // โหลด CSV ประวัติกาชา
+    Papa.parse("reverse1999_history_clean.csv", {
+      download: true,
+      header: true,
+      dynamicTyping: true,
+      complete: (results) => {
+        // กันแถวว่าง
+        allData = results.data.filter(row => row.summon_time);
+        initBannerOptions();
+      }
     });
 
-
-    function initBannerOptions() {
-      const bannerSelect = document.getElementById("bannerSelect");
-      const banners = [...new Set(allData.map(row => row.banner))].sort();
-
-      banners.forEach(banner => {
-        const opt = document.createElement("option");
-        opt.value = banner;
-        opt.textContent = banner;
-        bannerSelect.appendChild(opt);
+    // โหลด database ตัวละครจาก unit_data.json
+    fetch("unit_data.json")
+      .then(res => res.json())
+      .then(data => {
+        unitData = data;
+        console.log("Loaded unitData:", unitData);
       });
+
+    document.getElementById("btnSummary").addEventListener("click", showSummary);
+  });
+
+  // สร้าง options ของ banner จาก data จริง
+  function initBannerOptions() {
+    const bannerSelect = document.getElementById("bannerSelect");
+    const banners = [...new Set(allData.map(row => row.banner))].sort();
+
+    banners.forEach(banner => {
+      const opt = document.createElement("option");
+      opt.value = banner;
+      opt.textContent = banner;
+      bannerSelect.appendChild(opt);
+    });
+  }
+
+  function showSummary() {
+    const bannerSelect = document.getElementById("bannerSelect");
+    const selectedBanner = bannerSelect.value;
+
+    let filtered = allData;
+    if (selectedBanner !== "ALL") {
+      filtered = allData.filter(row => row.banner === selectedBanner);
     }
 
-    function showSummary() {
-      const bannerSelect = document.getElementById("bannerSelect");
-      const selectedBanner = bannerSelect.value;
-
-      let filtered = allData;
-      if (selectedBanner !== "ALL") {
-        filtered = allData.filter(row => row.banner === selectedBanner);
-      }
-
-      if (filtered.length === 0) {
-        alert("No data for this banner yet.");
-        return;
-      }
-
-      // จำนวน pulls
-      const totalPulls = filtered.length;
-
-      // นับ unit_name
-      const counts = {};
-      filtered.forEach(row => {
-        const name = row.unit_name || "UNKNOWN";
-        counts[name] = (counts[name] || 0) + 1;
-      });
-
-      // sort หา top 10
-      const topUnits = Object.entries(counts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10);
-
-      // เขียน summary text
-      const summaryText = document.getElementById("summaryText");
-      if (selectedBanner === "ALL") {
-        summaryText.textContent = `Total pulls: ${totalPulls} (all banners)`;
-      } else {
-        summaryText.textContent = `Total pulls on banner "${selectedBanner}": ${totalPulls}`;
-      }
-
-      // เขียนตาราง top units
-      const tbody = document.getElementById("topUnitsBody");
-      tbody.innerHTML = "";
-      topUnits.forEach(([name, cnt]) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${name}</td><td>${cnt}</td>`;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById("summaryCard").style.display = "block";
+    if (filtered.length === 0) {
+      alert("No data for this banner yet.");
+      return;
     }
-  </script>
+
+    const totalPulls = filtered.length;
+
+    // นับจำนวนตาม unit_id (จะได้ join กับ unitData ได้ตรง)
+    const countsById = {};
+    filtered.forEach(row => {
+      const id = row.unit_id;
+      if (!id) return;
+      countsById[id] = (countsById[id] || 0) + 1;
+    });
+
+    // sort หาตัวที่ออกบ่อยสุด 10 อันดับ
+    const topById = Object.entries(countsById)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+
+    // สรุปข้อความด้านบน
+    const summaryText = document.getElementById("summaryText");
+    if (selectedBanner === "ALL") {
+      summaryText.textContent = `Total pulls: ${totalPulls} (all banners)`;
+    } else {
+      summaryText.textContent = `Total pulls on banner "${selectedBanner}": ${totalPulls}`;
+    }
+
+    // เติมตาราง
+    const tbody = document.getElementById("topUnitsBody");
+    tbody.innerHTML = "";
+
+    topById.forEach(([id, count]) => {
+      const info = unitData[id] || {};
+
+      // ชื่อ: ถ้ามีใน unitData ก็ใช้ name_en, ถ้าไม่มีก็ fallback เป็น unit_name จาก CSV
+      const fallbackRow = filtered.find(r => r.unit_id === Number(id));
+      const name =
+        info.name_en ||
+        (fallbackRow ? fallbackRow.unit_name : `ID ${id}`);
+
+      // ดาว
+      const rarityStars = info.rarity ? "★".repeat(info.rarity) : "";
+
+      // debut banner
+      const debutBanner =
+        info.debut_banner ||
+        (fallbackRow ? fallbackRow.banner : "");
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${name}</td>
+        <td>${rarityStars}</td>
+        <td>${debutBanner}</td>
+        <td>${count}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("summaryCard").style.display = "block";
+  }
+</script>
+
 </body>
 </html>
