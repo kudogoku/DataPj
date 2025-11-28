@@ -189,20 +189,21 @@
     	(fallbackRow ? fallbackRow.unit_name : `ID_${id}`);
 
 
-      const iconUrl =
-  `https://raw.githubusercontent.com/myssal/Reverse-1999-CN-Asset/master/roles/${id}/${id}_sd.png`;
+            const iconUrl =
+        `https://raw.githubusercontent.com/myssal/Reverse-1999-CN-Asset/master/roles/${id}/${id}.png`;
 
-const tr = document.createElement("tr");
-tr.innerHTML = `
-  <td style="display:flex; align-items:center; gap:6px;">
-    <img src="${iconUrl}"
-         style="width:32px; height:auto; border-radius:4px;"
-         onerror="this.style.display='none'">
-    ${name}
-  </td>
-  <td>${count}</td>
-`;
-tbody.appendChild(tr);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="display:flex; align-items:center; gap:6px;">
+          <img src="${iconUrl}"
+               style="width:40px; height:auto; border-radius:4px;"
+               onerror="this.style.display='none'">
+          ${name}
+        </td>
+        <td>${count}</td>
+      `;
+      tbody.appendChild(tr);
+
 
     });
 
