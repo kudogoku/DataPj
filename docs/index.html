@@ -85,6 +85,7 @@
   let unitData = {};
 
   document.addEventListener("DOMContentLoaded", () => {
+    // โหลด CSV
     Papa.parse("reverse1999_history_clean.csv", {
       download: true,
       header: true,
@@ -95,12 +96,14 @@
       }
     });
 
+    // โหลด database ตัวละคร
     fetch("unit_data.json")
       .then(res => res.json())
       .then(data => {
         unitData = data;
         console.log("Loaded unitData:", unitData);
-      });
+      })
+      .catch(err => console.error("Failed to load unit_data.json", err));
 
     document.getElementById("btnSummary").addEventListener("click", showSummary);
   });
@@ -111,34 +114,30 @@
     // หา "วันแรกที่กด" ของแต่ละ banner
     const firstSeenByBanner = {};
 
-     allData.forEach(row => {
-    const banner = row.banner;
-    if (!banner) return;
+    allData.forEach(row => {
+      const banner = row.banner;
+      if (!banner) return;
 
-    const time = new Date(row.summon_time);
+      const time = new Date(row.summon_time);
 
-    if (!firstSeenByBanner[banner] || time < firstSeenByBanner[banner]) {
-      firstSeenByBanner[banner] = time;
-    }
-  });
+      if (!firstSeenByBanner[banner] || time < firstSeenByBanner[banner]) {
+        firstSeenByBanner[banner] = time;
+      }
+    });
 
-  // เอาชื่อ banner ทั้งหมดออกมา
-  let banners = Object.keys(firstSeenByBanner);
+    // เอาชื่อ banner ทั้งหมดออกมา
+    let banners = Object.keys(firstSeenByBanner);
 
-  // เรียงตามวัน (จากเก่า → ใหม่)
-  banners.sort((a, b) => firstSeenByBanner[a] - firstSeenByBanner[b]);
+    // เรียงตามวัน (จากเก่า → ใหม่)
+    banners.sort((a, b) => firstSeenByBanner[a] - firstSeenByBanner[b]);
 
-  // ถ้าอยากให้ "ใหม่สุดอยู่บนสุด" ก็ใช้บรรทัดนี้แทน:
-  // banners.sort((a, b) => firstSeenByBanner[b] - firstSeenByBanner[a]);
-
-  // เติม option ลง dropdown
-  banners.forEach(banner => {
-    const opt = document.createElement("option");
-    opt.value = banner;
-    opt.textContent = banner;   // ตอนนี้ยังใช้ชื่อจีนเหมือนเดิม
-    bannerSelect.appendChild(opt);
-  });
-}
+    banners.forEach(banner => {
+      const opt = document.createElement("option");
+      opt.value = banner;        // ใช้ชื่อจีนเป็น value
+      opt.textContent = banner;  // แสดงเป็นจีนเหมือนเดิมก่อน
+      bannerSelect.appendChild(opt);
+    });
+  }
 
   function showSummary() {
     const bannerSelect = document.getElementById("bannerSelect");
@@ -163,13 +162,12 @@
 
     const countsById = {};
     filtered.forEach(row => {
-      if (!row.unit_id) return;
+      if (!row.unit_id && row.unit_id !== 0) return;
       countsById[row.unit_id] = (countsById[row.unit_id] || 0) + 1;
     });
 
     const topById = Object.entries(countsById)
-      .sort((a, b) => b[1] - a[1])
-  
+      .sort((a, b) => b[1] - a[1]);   // โชว์ทุกตัว เรียงจากออกบ่อยสุด
 
     const tbody = document.getElementById("topUnitsBody");
     tbody.innerHTML = "";
@@ -179,32 +177,31 @@
       const info = unitData[key] || unitData[id] || {};
 
       const fallbackRow = filtered.find(r => r.unit_id === Number(id));
-      
-	  // รองรับหลาย ๆ ชื่อ field จากทุกเวอร์ชันของไฟล์
+
       const name =
-    	info.nameEng ||      // ไฟล์ CN asset ใหม่
-     	info.name_en ||      // ไฟล์แบบเก่า
-    	info.name_jp ||      // ถ้าเอาชื่อญี่ปุ่นแทน
-    	info.name ||         // ชื่อจีนดิบ ๆ
-    	(fallbackRow ? fallbackRow.unit_name : `ID_${id}`);
+        info.nameEng ||
+        info.name_en ||
+        info.name_jp ||
+        info.name ||
+        (fallbackRow ? fallbackRow.unit_name : `ID_${id}`);
 
-
-            const iconUrl =
+      // ใช้รูปปกติ roles/<id>/<id>.png
+      const iconUrl =
         `https://raw.githubusercontent.com/myssal/Reverse-1999-CN-Asset/master/roles/${id}/${id}.png`;
+
+      console.log("Icon URL for", id, "=>", iconUrl);
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td style="display:flex; align-items:center; gap:6px;">
           <img src="${iconUrl}"
-               style="width:40px; height:auto; border-radius:4px;"
-               onerror="this.style.display='none'">
+               style="width:40px; height:auto; border-radius:4px; border:1px solid #111827;"
+               onerror="this.style.border='1px solid red'">
           ${name}
         </td>
         <td>${count}</td>
       `;
       tbody.appendChild(tr);
-
-
     });
 
     document.getElementById("summaryCard").style.display = "block";
