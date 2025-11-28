@@ -152,13 +152,19 @@
     tbody.innerHTML = "";
 
     topById.forEach(([id, count]) => {
-      const info = unitData[id] || {};
+      const key = String(id);
+      const info = unitData[key] || unitData[id] || {};
 
       const fallbackRow = filtered.find(r => r.unit_id === Number(id));
+      
+	  // รองรับหลาย ๆ ชื่อ field จากทุกเวอร์ชันของไฟล์
       const name =
-        info.nameEng ||
-        info.name ||
-        (fallbackRow ? fallbackRow.unit_name : `ID ${id}`);
+    	info.nameEng ||      // ไฟล์ CN asset ใหม่
+     	info.name_en ||      // ไฟล์แบบเก่า
+    	info.name_jp ||      // ถ้าเอาชื่อญี่ปุ่นแทน
+    	info.name ||         // ชื่อจีนดิบ ๆ
+    	(fallbackRow ? fallbackRow.unit_name : `ID_${id}`);
+
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
