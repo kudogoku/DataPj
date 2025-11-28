@@ -185,9 +185,10 @@
         info.name ||
         (fallbackRow ? fallbackRow.unit_name : `ID_${id}`);
 
-      // ใช้รูปปกติ roles/<id>/<id>.png
+      // ใช้ head icon กลาง: singlebg/headicon_middle/<id>01.png
+      const fullIconId = `${id}01`;
       const iconUrl =
-  `https://raw.githubusercontent.com/myssal/Reverse-1999-CN-Asset/refs/heads/master/singlebg/headicon_monster/${id}.png`;
+        `https://raw.githubusercontent.com/myssal/Reverse-1999-CN-Asset/refs/heads/master/singlebg/headicon_middle/${fullIconId}.png`;
 
       console.log("Icon URL for", id, "=>", iconUrl);
 
@@ -196,7 +197,7 @@
         <td style="display:flex; align-items:center; gap:6px;">
           <img src="${iconUrl}"
                style="width:40px; height:auto; border-radius:4px; border:1px solid #111827;"
-               onerror="this.style.border='1px solid red'">
+               onerror="this.style.display='none'">
           ${name}
         </td>
         <td>${count}</td>
