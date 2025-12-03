@@ -49,6 +49,10 @@
     th {
       background: #1f2937;
     }
+    .small-note {
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
   </style>
 </head>
 <body>
@@ -61,12 +65,15 @@
       <option value="ALL">All banners</option>
     </select>
     <br />
-    <button id="btnSummary">Show summary</button>
+    <button id="btnSummary">Show summary &amp; 6★ stats</button>
   </div>
 
   <div class="card" id="summaryCard" style="display:none;">
     <h2>Summary</h2>
     <p id="summaryText"></p>
+
+    <h3>6★ Analysis</h3>
+    <p id="analysisText" class="small-note"></p>
 
     <h3>Top units</h3>
     <table>
@@ -87,7 +94,7 @@
   // =======================
   let allData = [];
   let unitData = {};
-  let rarityMap = {};   // <-- มาจาก unit_rarity.json
+  let rarityMap = {};   // from unit_rarity.json
 
   document.addEventListener("DOMContentLoaded", () => {
     // โหลด CSV ประวัติกาชา
@@ -150,7 +157,11 @@
     });
   }
 
-  // แสดงสรุป + ตารางตัวละคร
+  function formatPercent(x) {
+    return (x * 100).toFixed(2) + "%";
+  }
+
+  // แสดงสรุป + ตารางตัวละคร + วิเคราะห์ 6★
   function showSummary() {
     const bannerSelect = document.getElementById("bannerSelect");
     const selectedBanner = bannerSelect.value;
@@ -167,6 +178,7 @@
     const totalPulls = filtered.length;
 
     const summaryText = document.getElementById("summaryText");
+    const analysisText = document.getElementById("analysisText");
     summaryText.textContent =
       selectedBanner === "ALL"
         ? `Total pulls: ${totalPulls} (all banners)`
@@ -184,6 +196,9 @@
 
     const tbody = document.getElementById("topUnitsBody");
     tbody.innerHTML = "";
+
+    // นับจำนวน pulls ตาม rarity
+    const rarityPulls = { 3: 0, 4: 0, 5: 0, 6: 0, unknown: 0 };
 
     topById.forEach(([id, count]) => {
       const key = String(id);
@@ -207,6 +222,13 @@
       const rarityValue = rarityMap[name];
       const rarityDisplay = (rarityValue !== undefined) ? `${rarityValue}★` : "?";
 
+      // สะสมจำนวน pull ตาม rarity
+      if (rarityValue === 3 || rarityValue === 4 || rarityValue === 5 || rarityValue === 6) {
+        rarityPulls[rarityValue] += count;
+      } else {
+        rarityPulls.unknown += count;
+      }
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td style="display:flex; align-items:center; gap:6px;">
@@ -220,6 +242,48 @@
       `;
       tbody.appendChild(tr);
     });
+
+    // ================
+    // วิเคราะห์ 6★
+    // ================
+    const sixPulls = rarityPulls[6] || 0;
+    let analysisHtml = "";
+
+    if (sixPulls === 0) {
+      analysisHtml = `
+        No 6★ found in this selection yet, so I can't estimate the 6★ rate.
+        Try selecting "All banners" or a wider range of data.
+      `;
+    } else {
+      const sixRate = sixPulls / totalPulls;           // สัดส่วน 6★ ต่อ 1 pull
+      const avgPullPerSix = totalPulls / sixPulls;     // โดยเฉลี่ยกี่ pull ต่อ 6★
+
+      // คำนวณโอกาสได้อย่างน้อย 1 ตัวใน N pulls (จากเรตจริงของเธอ)
+      function chanceAtLeastOne(n) {
+        return 1 - Math.pow(1 - sixRate, n);
+      }
+
+      const chances = [
+        { n: 10,  label: "10 pulls" },
+        { n: 30,  label: "30 pulls" },
+        { n: 50,  label: "50 pulls" },
+        { n: 90,  label: "90 pulls" }
+      ];
+
+      analysisHtml += `
+        6★ pulls: <b>${sixPulls}</b> (${formatPercent(sixRate)} of all pulls)<br>
+        On average, you get <b>1× 6★ every ${avgPullPerSix.toFixed(1)} pulls</b> based on your own history.<br><br>
+        Approx. chance to get <b>at least one 6★</b> (using your rate):<br>
+        <ul>
+          ${chances.map(c => `<li>${c.label}: ${formatPercent(chanceAtLeastOne(c.n))}</li>`).join("")}
+        </ul>
+        <span class="small-note">
+          * These numbers are based on your past data, not the official banner rate.
+        </span>
+      `;
+    }
+
+    analysisText.innerHTML = analysisHtml;
 
     document.getElementById("summaryCard").style.display = "block";
   }
