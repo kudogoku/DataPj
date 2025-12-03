@@ -73,7 +73,9 @@
       <thead>
         <tr>
           <th>Unit</th>
+          <th>Rarity</th>
           <th>Count</th>
+
         </tr>
       </thead>
       <tbody id="topUnitsBody"></tbody>
@@ -82,7 +84,16 @@
 
 <script>
   let allData = [];
-  let unitData = {};
+let unitData = {};
+
+// --- Rarity Detection Function ---
+function getRarity(unitId) {
+  if (unitId >= 3000) return 6;   // 6★
+  if (unitId >= 2000) return 5;   // 5★
+  if (unitId >= 1000) return 4;   // 4★
+  return 3;                       // 3★
+}
+
 
   document.addEventListener("DOMContentLoaded", () => {
     // โหลด CSV
@@ -193,15 +204,19 @@
       console.log("Icon URL for", id, "=>", iconUrl);
 
       const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td style="display:flex; align-items:center; gap:6px;">
-          <img src="${iconUrl}"
-               style="width:40px; height:auto; border-radius:4px; border:1px solid #111827;"
-               onerror="this.style.display='none'">
-          ${name}
-        </td>
-        <td>${count}</td>
-      `;
+     const rarity = getRarity(Number(id));
+
+tr.innerHTML = `
+  <td style="display:flex; align-items:center; gap:6px;">
+    <img src="${iconUrl}"
+         style="width:40px; height:auto; border-radius:4px; border:1px solid #111827;"
+         onerror="this.style.display='none'">
+    ${name}
+  </td>
+  <td>${rarity}★</td>
+  <td>${count}</td>
+`;
+
       tbody.appendChild(tr);
     });
 
