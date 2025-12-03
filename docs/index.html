@@ -75,7 +75,6 @@
           <th>Unit</th>
           <th>Rarity</th>
           <th>Count</th>
-
         </tr>
       </thead>
       <tbody id="topUnitsBody"></tbody>
@@ -83,20 +82,15 @@
   </div>
 
 <script>
+  // =======================
+  // Global data containers
+  // =======================
   let allData = [];
-let unitData = {};
-
-// --- Rarity Detection Function ---
-function getRarity(unitId) {
-  if (unitId >= 3000) return 6;   // 6★
-  if (unitId >= 2000) return 5;   // 5★
-  if (unitId >= 1000) return 4;   // 4★
-  return 3;                       // 3★
-}
-
+  let unitData = {};
+  let rarityMap = {};   // <-- มาจาก unit_rarity.json
 
   document.addEventListener("DOMContentLoaded", () => {
-    // โหลด CSV
+    // โหลด CSV ประวัติกาชา
     Papa.parse("reverse1999_history_clean.csv", {
       download: true,
       header: true,
@@ -116,13 +110,22 @@ function getRarity(unitId) {
       })
       .catch(err => console.error("Failed to load unit_data.json", err));
 
+    // โหลด rarity database (unit_rarity.json)
+    fetch("unit_rarity.json")
+      .then(res => res.json())
+      .then(data => {
+        rarityMap = data;
+        console.log("Loaded rarityMap:", rarityMap);
+      })
+      .catch(err => console.error("Failed to load unit_rarity.json", err));
+
     document.getElementById("btnSummary").addEventListener("click", showSummary);
   });
 
+  // สร้างตัวเลือกแบนเนอร์
   function initBannerOptions() {
     const bannerSelect = document.getElementById("bannerSelect");
 
-    // หา "วันแรกที่กด" ของแต่ละ banner
     const firstSeenByBanner = {};
 
     allData.forEach(row => {
@@ -136,25 +139,23 @@ function getRarity(unitId) {
       }
     });
 
-    // เอาชื่อ banner ทั้งหมดออกมา
     let banners = Object.keys(firstSeenByBanner);
-
-    // เรียงตามวัน (จากเก่า → ใหม่)
     banners.sort((a, b) => firstSeenByBanner[a] - firstSeenByBanner[b]);
 
     banners.forEach(banner => {
       const opt = document.createElement("option");
-      opt.value = banner;        // ใช้ชื่อจีนเป็น value
-      opt.textContent = banner;  // แสดงเป็นจีนเหมือนเดิมก่อน
+      opt.value = banner;
+      opt.textContent = banner;
       bannerSelect.appendChild(opt);
     });
   }
 
+  // แสดงสรุป + ตารางตัวละคร
   function showSummary() {
     const bannerSelect = document.getElementById("bannerSelect");
     const selectedBanner = bannerSelect.value;
 
-    let filtered = selectedBanner === "ALL"
+    const filtered = (selectedBanner === "ALL")
       ? allData
       : allData.filter(row => row.banner === selectedBanner);
 
@@ -171,6 +172,7 @@ function getRarity(unitId) {
         ? `Total pulls: ${totalPulls} (all banners)`
         : `Total pulls on banner "${selectedBanner}": ${totalPulls}`;
 
+    // นับจำนวนที่ออกต่อ unit_id
     const countsById = {};
     filtered.forEach(row => {
       if (!row.unit_id && row.unit_id !== 0) return;
@@ -178,7 +180,7 @@ function getRarity(unitId) {
     });
 
     const topById = Object.entries(countsById)
-      .sort((a, b) => b[1] - a[1]);   // โชว์ทุกตัว เรียงจากออกบ่อยสุด
+      .sort((a, b) => b[1] - a[1]);
 
     const tbody = document.getElementById("topUnitsBody");
     tbody.innerHTML = "";
@@ -196,27 +198,26 @@ function getRarity(unitId) {
         info.name ||
         (fallbackRow ? fallbackRow.unit_name : `ID_${id}`);
 
-      // ใช้ head icon กลาง: singlebg/headicon_middle/<id>01.png
+      // ใช้ head icon กลาง
       const fullIconId = `${id}01`;
       const iconUrl =
         `https://raw.githubusercontent.com/myssal/Reverse-1999-CN-Asset/refs/heads/master/singlebg/headicon_middle/${fullIconId}.png`;
 
-      console.log("Icon URL for", id, "=>", iconUrl);
+      // หา rarity จากชื่อ
+      const rarityValue = rarityMap[name];
+      const rarityDisplay = (rarityValue !== undefined) ? `${rarityValue}★` : "?";
 
       const tr = document.createElement("tr");
-     const rarity = getRarity(Number(id));
-
-tr.innerHTML = `
-  <td style="display:flex; align-items:center; gap:6px;">
-    <img src="${iconUrl}"
-         style="width:40px; height:auto; border-radius:4px; border:1px solid #111827;"
-         onerror="this.style.display='none'">
-    ${name}
-  </td>
-  <td>${rarity}★</td>
-  <td>${count}</td>
-`;
-
+      tr.innerHTML = `
+        <td style="display:flex; align-items:center; gap:6px;">
+          <img src="${iconUrl}"
+               style="width:40px; height:auto; border-radius:4px; border:1px solid #111827;"
+               onerror="this.style.display='none'">
+          ${name}
+        </td>
+        <td>${rarityDisplay}</td>
+        <td>${count}</td>
+      `;
       tbody.appendChild(tr);
     });
 
