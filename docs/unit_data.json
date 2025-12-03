@@ -3023,14 +3023,14 @@
   "3082": {
     "id": 3082,
     "name": "小叶尼塞",
-    "nameEng": "Енисей",
+    "nameEng": "Yenisei",
     "roleBirthday": "3/4",
     "signature": "https://github.com/myssal/Reverse-1999-CN-Asset/tree/master/singlebg/signature/3082.png",
     "live2d": [
       {
         "id": 308201,
         "name": "小叶尼塞",
-        "nameEng": "Енисей",
+        "nameEng": "Yenisei",
         "des": "初始皮肤",
         "characterSkin": "",
         "characterSkinNameEng": "",
